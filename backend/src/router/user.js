@@ -1,7 +1,7 @@
 // backend/routes/user.js
 const express = require('express');
 const zod=  require('zod')
-const {User} = require('../db/index')
+const {User, Account} = require('../db/index')
 const router = express.Router();
 const jwt = require('jsonwebtoken')
 const {JWT_SECRET} = require('../config')
@@ -15,8 +15,7 @@ const signUpSchema = zod.object({
 
 // signup route 
 router.post('/signup',async (req,res)=>{
-    console.log('i am her ',req.body)
-    const body = req.body;
+   
     // check data is valid 
     const success = signUpSchema.safeParse(req.body)
     if(!success){
@@ -26,7 +25,7 @@ router.post('/signup',async (req,res)=>{
     }
 
     const user = User.findOne({
-        username:body.username
+        username:req.body.username
     })
 
     if(user._id){
@@ -35,10 +34,17 @@ router.post('/signup',async (req,res)=>{
         })
     }
 
-    const dbUser =await User.create(body);
+    const dbUser =await User.create(req.body);
+    console.log(dbUser)
     const jwttoken = jwt.sign({
         userId:dbUser._id
     },JWT_SECRET)
+
+    //give random money to user when account is created bw 1 and 1,00,000
+    await Account.create({
+        userId:  dbUser._id        ,
+        balance:1+Math.random()*100000
+    })
     
     res.json({
         message:'user created successfully',

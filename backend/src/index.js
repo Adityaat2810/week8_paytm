@@ -9,6 +9,7 @@ app.use(bodyParser.json())
 
 app.use("/api/v1", rootRouter);
 
+
 app.listen(4000,()=>{
     console.log(`server started at port 4000`);
 })
